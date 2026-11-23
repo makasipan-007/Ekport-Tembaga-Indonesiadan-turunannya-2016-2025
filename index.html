@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rantai Pasok Perdagangan Tembaga Indonesia (2016–2025)</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts: Space Mono & IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Tailwind Custom Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            mbBg: '#FAF9F6',
+            mbCard: '#FFFFFF',
+            mbBorder: '#DCD9D0',
+            mbText: '#1F2421',
+            mbMuted: '#5C625D',
+            mbForest: '#1E5631',    // HS 740311 Katoda
+            mbTerracotta: '#B85D3B',// HS 260300 Konsentrat
+            mbTeal: '#4A7C8C',      // HS 740400 Skrap
+            mbOchre: '#D9A441',     // HS 740100 Matte
+            mbPlum: '#7A5C61'       // HS 740200 Anoda
+          },
+          fontFamily: {
+            mono: ['Space Mono', 'IBM Plex Mono', 'monospace'],
+            sans: ['IBM Plex Mono', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #FAF9F6;
+      color: #1F2421;
+      font-family: 'IBM Plex Mono', monospace;
+      -webkit-font-smoothing: antialiased;
+      user-select: none;
+    }
+    .font-header {
+      font-family: 'Space Mono', monospace;
+    }
+    /* Dynamic tab transition styling */
+    .tab-content {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.25s ease-in-out;
+    }
+    .tab-content.active {
+      display: block;
+      opacity: 1;
+    }
+    /* Custom scrollbar for data tables */
+    ::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #FAF9F6;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #DCD9D0;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #B85D3B;
+    }
+  </style>
+</head>
+<body class="p-2 sm:p-4 min-h-screen flex items-center justify-center">
+
+  <div class="w-full max-w-[960px] bg-mbCard border border-mbBorder rounded-xl shadow-sm overflow-hidden flex flex-col my-auto">
+    
+    <!-- Top Editorial Header Strip -->
+    <header class="border-b border-mbBorder bg-mbBg p-4 sm:p-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+        <div>
+          <div class="inline-flex items-center gap-2 text-xs font-header font-bold text-mbTerracotta uppercase tracking-wider mb-1">
+            <span class="w-2 h-2 rounded-full bg-mbTerracotta inline-block animate-pulse"></span>
+            Mongabay Indonesia Visual Data
+          </div>
+          <h1 class="text-base sm:text-xl font-header font-bold text-mbText tracking-tight">
+            Rantai Pasok Perdagangan Tembaga Indonesia (2016–2025)
+          </h1>
+        </div>
+        <div class="text-xs text-mbMuted font-mono">
+          Periode Data: <span class="text-mbText font-semibold">2016–2025</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Top KPI Summary Strip with Animated Counters -->
+    <div class="grid grid-cols-2 md:grid-cols-4 border-b border-mbBorder divide-x divide-y md:divide-y-0 divide-mbBorder bg-white">
+      <div class="p-3 sm:p-4 flex flex-col justify-center">
+        <span class="text-[11px] uppercase tracking-wider text-mbMuted font-mono font-medium">Total Ekspor</span>
+        <div class="text-lg sm:text-2xl font-header font-bold text-mbTerracotta mt-0.5" id="kpi-ekspor">
+          US$ 0,00 M
+        </div>
+        <span class="text-[10px] text-mbMuted mt-0.5">21,59 Juta Ton</span>
+      </div>
+      <div class="p-3 sm:p-4 flex flex-col justify-center">
+        <span class="text-[11px] uppercase tracking-wider text-mbMuted font-mono font-medium">Total Impor</span>
+        <div class="text-lg sm:text-2xl font-header font-bold text-mbMuted mt-0.5" id="kpi-impor">
+          US$ 0,00 M
+        </div>
+        <span class="text-[10px] text-mbMuted mt-0.5">1,00 Juta Ton</span>
+      </div>
+      <div class="p-3 sm:p-4 flex flex-col justify-center">
+        <span class="text-[11px] uppercase tracking-wider text-mbMuted font-mono font-medium">Surplus Bersih</span>
+        <div class="text-lg sm:text-2xl font-header font-bold text-mbForest mt-0.5" id="kpi-surplus">
+          +US$ 0,00 M
+        </div>
+        <span class="text-[10px] text-mbMuted mt-0.5">Net Perdagangan</span>
+      </div>
+      <div class="p-3 sm:p-4 flex flex-col justify-center">
+        <span class="text-[11px] uppercase tracking-wider text-mbMuted font-mono font-medium">Pangsa Konsentrat</span>
+        <div class="text-lg sm:text-2xl font-header font-bold text-mbTerracotta mt-0.5" id="kpi-pangsa">
+          0,0%
+        </div>
+        <span class="text-[10px] text-mbMuted mt-0.5">HS 260300 (Hulu)</span>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="border-b border-mbBorder bg-mbBg p-2 flex items-center justify-between gap-1 overflow-x-auto text-xs font-header">
+      <div class="flex items-center gap-1 sm:gap-2">
+        <button onclick="switchTab(1)" id="tab-btn-1" class="tab-btn px-3 py-2 rounded-lg font-bold border transition-all duration-200 bg-mbCard border-mbBorder text-mbTerracotta shadow-sm">
+          1. Tren 2016–2025
+        </button>
+        <button onclick="switchTab(2)" id="tab-btn-2" class="tab-btn px-3 py-2 rounded-lg font-medium border transition-all duration-200 border-transparent text-mbMuted hover:text-mbText">
+          2. Nilai Tambah & Struktur
+        </button>
+        <button onclick="switchTab(3)" id="tab-btn-3" class="tab-btn px-3 py-2 rounded-lg font-medium border transition-all duration-200 border-transparent text-mbMuted hover:text-mbText">
+          3. Mitra Dagang
+        </button>
+      </div>
+      <div class="hidden sm:flex items-center gap-1 text-[11px] text-mbMuted pr-2 font-mono">
+        <span>Gunakan swipe / ← →</span>
+      </div>
+    </nav>
+
+    <!-- TAB SLIDE CONTENT CONTAINER -->
+    <main id="swipe-container" class="p-4 sm:p-5 flex-1 relative min-h-[460px]">
+
+      <!-- SLIDE 1: TREN 2016–2025 -->
+      <section id="tab-content-1" class="tab-content active space-y-4">
+        <!-- Controls Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-mbBg p-3 rounded-lg border border-mbBorder">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-mbMuted">ARUS:</span>
+            <div class="inline-flex p-0.5 bg-white rounded-md border border-mbBorder text-xs">
+              <button onclick="setSlide1Flow('export')" id="s1-flow-exp" class="px-2.5 py-1 rounded font-bold bg-mbTerracotta text-white shadow-sm transition">Ekspor</button>
+              <button onclick="setSlide1Flow('import')" id="s1-flow-imp" class="px-2.5 py-1 rounded text-mbMuted hover:text-mbText transition">Impor</button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-bold text-mbMuted">METRIK:</span>
+            <div class="inline-flex p-0.5 bg-white rounded-md border border-mbBorder text-xs">
+              <button onclick="setSlide1Metric('usd')" id="s1-met-usd" class="px-2.5 py-1 rounded font-bold bg-mbText text-white shadow-sm transition">Nilai (Juta US$)</button>
+              <button onclick="setSlide1Metric('tons')" id="s1-met-ton" class="px-2.5 py-1 rounded text-mbMuted hover:text-mbText transition">Volume (Ribu Ton)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Interactive Legend -->
+        <div class="flex flex-wrap items-center justify-center gap-3 text-xs font-mono pt-1">
+          <button onclick="toggleHsSeries(0)" id="leg-hs-0" class="flex items-center gap-1.5 px-2 py-1 rounded border border-mbBorder bg-white transition hover:opacity-80">
+            <span class="w-3 h-3 rounded-sm bg-mbTerracotta inline-block"></span>
+            <span>HS 260300 (Bijih & Konsentrat)</span>
+          </button>
+          <button onclick="toggleHsSeries(1)" id="leg-hs-1" class="flex items-center gap-1.5 px-2 py-1 rounded border border-mbBorder bg-white transition hover:opacity-80">
+            <span class="w-3 h-3 rounded-sm bg-mbForest inline-block"></span>
+            <span>HS 740311 (Katoda Murni)</span>
+          </button>
+          <button onclick="toggleHsSeries(2)" id="leg-hs-2" class="flex items-center gap-1.5 px-2 py-1 rounded border border-mbBorder bg-white transition hover:opacity-80">
+            <span class="w-3 h-3 rounded-sm bg-mbTeal inline-block"></span>
+            <span>HS 740400 (Limbah & Skrap)</span>
+          </button>
+          <button onclick="toggleHsSeries(3)" id="leg-hs-3" class="flex items-center gap-1.5 px-2 py-1 rounded border border-mbBorder bg-white transition hover:opacity-80">
+            <span class="w-3 h-3 rounded-sm bg-mbOchre inline-block"></span>
+            <span>HS 740100 (Matte & Semen)</span>
+          </button>
+          <button onclick="toggleHsSeries(4)" id="leg-hs-4" class="flex items-center gap-1.5 px-2 py-1 rounded border border-mbBorder bg-white transition hover:opacity-80">
+            <span class="w-3 h-3 rounded-sm bg-mbPlum inline-block"></span>
+            <span>HS 740200 (Anoda)</span>
+          </button>
+        </div>
+
+        <!-- Chart Canvas Container -->
+        <div class="relative h-[280px] sm:h-[320px] w-full">
+          <canvas id="chart-slide-1"></canvas>
+        </div>
+
+        <!-- Dynamic Insight Callout -->
+        <div id="slide1-insight" class="bg-mbBg border-l-4 border-mbTerracotta p-3.5 rounded-r-lg text-xs font-mono text-mbText leading-relaxed">
+          <!-- Dynamic text inserted via JS -->
+        </div>
+      </section>
+
+      <!-- SLIDE 2: NILAI TAMBAH & STRUKTUR -->
+      <section id="tab-content-2" class="tab-content space-y-4">
+        <div class="bg-mbBg p-3 rounded-lg border border-mbBorder text-xs text-mbMuted flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div>
+            <span class="font-bold text-mbText font-header">Disparitas Harga Satuan Rata-rata (2016–2025):</span>
+            Perbandingan nilai ekonomi per metrik ton di setiap simpul pengolahan.
+          </div>
+          <div class="inline-flex items-center gap-2 font-mono text-[11px] bg-white px-2 py-1 rounded border border-mbBorder">
+            <span class="w-2.5 h-2.5 rounded-full bg-mbForest"></span> Hilir/Pemurnian
+            <span class="w-2.5 h-2.5 rounded-full bg-mbTerracotta"></span> Mentah/Hulu
+          </div>
+        </div>
+
+        <!-- Price Visual Comparison Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+          <!-- HS 260300 -->
+          <div class="bg-white p-3 rounded-lg border border-mbBorder flex flex-col justify-between hover:border-mbTerracotta transition">
+            <div>
+              <span class="text-[10px] font-mono font-bold text-mbTerracotta uppercase">Hulu</span>
+              <h3 class="text-xs font-bold text-mbText mt-0.5">HS 260300</h3>
+              <p class="text-[11px] text-mbMuted leading-tight mt-0.5">Bijih & Konsentrat</p>
+            </div>
+            <div class="mt-3 pt-2 border-t border-mbBg">
+              <div class="text-xs font-mono text-mbMuted">Rata-rata Ekspor:</div>
+              <div class="text-base font-header font-bold text-mbTerracotta">US$ 2.624<span class="text-[10px] font-normal text-mbMuted">/ton</span></div>
+              <div class="text-[10px] text-mbMuted mt-1">Harga Impor: US$ 147/ton</div>
+            </div>
+          </div>
+
+          <!-- HS 740100 -->
+          <div class="bg-white p-3 rounded-lg border border-mbBorder flex flex-col justify-between hover:border-mbOchre transition">
+            <div>
+              <span class="text-[10px] font-mono font-bold text-mbOchre uppercase">Antara I</span>
+              <h3 class="text-xs font-bold text-mbText mt-0.5">HS 740100</h3>
+              <p class="text-[11px] text-mbMuted leading-tight mt-0.5">Matte & Semen</p>
+            </div>
+            <div class="mt-3 pt-2 border-t border-mbBg">
+              <div class="text-xs font-mono text-mbMuted">Rata-rata Ekspor:</div>
+              <div class="text-base font-header font-bold text-mbOchre">US$ 1.191<span class="text-[10px] font-normal text-mbMuted">/ton</span></div>
+              <div class="text-[10px] text-mbMuted mt-1">Harga Impor: US$ 16.200/ton</div>
+            </div>
+          </div>
+
+          <!-- HS 740200 -->
+          <div class="bg-white p-3 rounded-lg border border-mbBorder flex flex-col justify-between hover:border-mbPlum transition">
+            <div>
+              <span class="text-[10px] font-mono font-bold text-mbPlum uppercase">Antara II</span>
+              <h3 class="text-xs font-bold text-mbText mt-0.5">HS 740200</h3>
+              <p class="text-[11px] text-mbMuted leading-tight mt-0.5">Anoda Tembaga</p>
+            </div>
+            <div class="mt-3 pt-2 border-t border-mbBg">
+              <div class="text-xs font-mono text-mbMuted">Rata-rata Ekspor:</div>
+              <div class="text-base font-header font-bold text-mbPlum">US$ 4.666<span class="text-[10px] font-normal text-mbMuted">/ton</span></div>
+              <div class="text-[10px] text-mbMuted mt-1">Harga Impor: US$ 9.631/ton</div>
+            </div>
+          </div>
+
+          <!-- HS 740311 -->
+          <div class="bg-white p-3 rounded-lg border-2 border-mbForest shadow-sm flex flex-col justify-between">
+            <div>
+              <span class="text-[10px] font-mono font-bold text-mbForest uppercase">Hilir Murni</span>
+              <h3 class="text-xs font-bold text-mbText mt-0.5">HS 740311</h3>
+              <p class="text-[11px] text-mbMuted leading-tight mt-0.5">Katoda Tembaga</p>
+            </div>
+            <div class="mt-3 pt-2 border-t border-mbBg">
+              <div class="text-xs font-mono text-mbMuted">Rata-rata Ekspor:</div>
+              <div class="text-base font-header font-bold text-mbForest">US$ 7.635<span class="text-[10px] font-normal text-mbMuted">/ton</span></div>
+              <div class="text-[10px] text-mbMuted mt-1">Harga Impor: US$ 8.534/ton</div>
+            </div>
+          </div>
+
+          <!-- HS 740400 -->
+          <div class="bg-white p-3 rounded-lg border border-mbBorder flex flex-col justify-between hover:border-mbTeal transition">
+            <div>
+              <span class="text-[10px] font-mono font-bold text-mbTeal uppercase">Sekunder</span>
+              <h3 class="text-xs font-bold text-mbText mt-0.5">HS 740400</h3>
+              <p class="text-[11px] text-mbMuted leading-tight mt-0.5">Limbah & Skrap</p>
+            </div>
+            <div class="mt-3 pt-2 border-t border-mbBg">
+              <div class="text-xs font-mono text-mbMuted">Rata-rata Ekspor:</div>
+              <div class="text-base font-header font-bold text-mbTeal">US$ 6.441<span class="text-[10px] font-normal text-mbMuted">/ton</span></div>
+              <div class="text-[10px] text-mbMuted mt-1">Harga Impor: US$ 5.629/ton</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cumulative Table Summary -->
+        <div class="border border-mbBorder rounded-lg overflow-hidden bg-white text-xs">
+          <div class="bg-mbBg px-3 py-2 border-b border-mbBorder font-header font-bold text-mbText flex justify-between items-center">
+            <span>Matriks Kumulatif Rantai Nilai Tembaga (2016–2025)</span>
+            <span class="text-[10px] font-mono font-normal text-mbMuted">Satuan: Juta US$ & Ribu Ton</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-mbBg/50 text-mbMuted font-mono border-b border-mbBorder text-[11px]">
+                  <th class="p-2 sm:p-2.5">Kode HS</th>
+                  <th class="p-2 sm:p-2.5">Posisi Rantai Nilai</th>
+                  <th class="p-2 sm:p-2.5 text-right">Ekspor (Juta US$)</th>
+                  <th class="p-2 sm:p-2.5 text-right">Ekspor (Ribu Ton)</th>
+                  <th class="p-2 sm:p-2.5 text-right">Impor (Juta US$)</th>
+                  <th class="p-2 sm:p-2.5 text-right">Impor (Ribu Ton)</th>
+                  <th class="p-2 sm:p-2.5 text-right">Net Bersih</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-mbBorder font-mono">
+                <tr class="hover:bg-mbBg/30">
+                  <td class="p-2 sm:p-2.5 font-bold text-mbTerracotta">260300</td>
+                  <td class="p-2 sm:p-2.5 font-sans">Bijih & Konsentrat Tembaga</td>
+                  <td class="p-2 sm:p-2.5 text-right font-bold">50.618,36</td>
+                  <td class="p-2 sm:p-2.5 text-right">19.288,74</td>
+                  <td class="p-2 sm:p-2.5 text-right">6,85</td>
+                  <td class="p-2 sm:p-2.5 text-right">46,46</td>
+                  <td class="p-2 sm:p-2.5 text-right text-mbForest font-bold">+50.611,51</td>
+                </tr>
+                <tr class="hover:bg-mbBg/30">
+                  <td class="p-2 sm:p-2.5 font-bold text-mbOchre">740100</td>
+                  <td class="p-2 sm:p-2.5 font-sans">Matte & Tembaga Semen</td>
+                  <td class="p-2 sm:p-2.5 text-right font-bold">80,59</td>
+                  <td class="p-2 sm:p-2.5 text-right">67,66</td>
+                  <td class="p-2 sm:p-2.5 text-right">13,32</td>
+                  <td class="p-2 sm:p-2.5 text-right">0,82</td>
+                  <td class="p-2 sm:p-2.5 text-right text-mbForest font-bold">+67,27</td>
+                </tr>
+                <tr class="hover:bg-mbBg/30">
+                  <td class="p-2 sm:p-2.5 font-bold text-mbPlum">740200</td>
+                  <td class="p-2 sm:p-2.5 font-sans">Anoda Tembaga Tidak Dimurnikan</td>
+                  <td class="p-2 sm:p-2.5 text-right font-bold">0,63</td>
+                  <td class="p-2 sm:p-2.5 text-right">0,14</td>
+                  <td class="p-2 sm:p-2.5 text-right">6,67</td>
+                  <td class="p-2 sm:p-2.5 text-right">0,69</td>
+                  <td class="p-2 sm:p-2.5 text-right text-mbTerracotta font-bold">-6,04</td>
+                </tr>
+                <tr class="hover:bg-mbBg/30 bg-mbForest/5">
+                  <td class="p-2 sm:p-2.5 font-bold text-mbForest">740311</td>
+                  <td class="p-2 sm:p-2.5 font-sans font-semibold">Katoda Tembaga Murni</td>
+                  <td class="p-2 sm:p-2.5 text-right font-bold text-mbForest">13.905,45</td>
+                  <td class="p-2 sm:p-2.5 text-right">1.821,25</td>
+                  <td class="p-2 sm:p-2.5 text-right">7.333,12</td>
+                  <td class="p-2 sm:p-2.5 text-right">859,29</td>
+                  <td class="p-2 sm:p-2.5 text-right text-mbForest font-bold">+6.572,33</td>
+                </tr>
+                <tr class="hover:bg-mbBg/30">
+                  <td class="p-2 sm:p-2.5 font-bold text-mbTeal">740400</td>
+                  <td class="p-2 sm:p-2.5 font-sans">Limbah & Skrap Tembaga</td>
+                  <td class="p-2 sm:p-2.5 text-right font-bold">2.652,43</td>
+                  <td class="p-2 sm:p-2.5 text-right">411,83</td>
+                  <td class="p-2 sm:p-2.5 text-right">509,16</td>
+                  <td class="p-2 sm:p-2.5 text-right">90,45</td>
+                  <td class="p-2 sm:p-2.5 text-right text-mbForest font-bold">+2.143,27</td>
+                </tr>
+                <tr class="bg-mbBg font-bold">
+                  <td class="p-2 sm:p-2.5 font-header" colspan="2">TOTAL RANTAI PASOK</td>
+                  <td class="p-2 sm:p-2.5 text-right text-mbTerracotta">67.257,47</td>
+                  <td class="p-2 sm:p-2.5 text-right">21.589,62</td>
+                  <td class="p-2 sm:p-2.5 text-right text-mbMuted">7.869,12</td>
+                  <td class="p-2 sm:p-2.5 text-right">997,72</td>
+                  <td class="p-2 sm:p-2.5 text-right text-mbForest">+59.388,35</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: MITRA DAGANG -->
+      <section id="tab-content-3" class="tab-content space-y-4">
+        <!-- Controls Bar for Slide 3 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 bg-mbBg p-3 rounded-lg border border-mbBorder text-xs">
+          <!-- Flow Pill -->
+          <div>
+            <label class="block font-mono text-[10px] uppercase font-bold text-mbMuted mb-1">Arus Perdagangan</label>
+            <div class="inline-flex w-full p-0.5 bg-white rounded-md border border-mbBorder">
+              <button onclick="setSlide3Flow('Export')" id="s3-flow-exp" class="w-1/2 py-1 rounded font-bold bg-mbTerracotta text-white shadow-sm transition">Ekspor</button>
+              <button onclick="setSlide3Flow('Import')" id="s3-flow-imp" class="w-1/2 py-1 rounded text-mbMuted hover:text-mbText transition">Impor</button>
+            </div>
+          </div>
+
+          <!-- HS Code Selector -->
+          <div>
+            <label class="block font-mono text-[10px] uppercase font-bold text-mbMuted mb-1">Simpul Rantai Pasok</label>
+            <select id="s3-hs-select" onchange="renderSlide3Chart()" class="w-full bg-white border border-mbBorder rounded-md px-2 py-1.5 font-mono text-xs focus:outline-none focus:border-mbTerracotta">
+              <option value="ALL">Semua Kode HS (Total)</option>
+              <option value="260300">HS 260300 (Bijih & Konsentrat)</option>
+              <option value="740311">HS 740311 (Katoda Murni)</option>
+              <option value="740400">HS 740400 (Limbah & Skrap)</option>
+              <option value="740100">HS 740100 (Matte & Semen)</option>
+              <option value="740200">HS 740200 (Anoda Tembaga)</option>
+            </select>
+          </div>
+
+          <!-- Period Selector -->
+          <div>
+            <label class="block font-mono text-[10px] uppercase font-bold text-mbMuted mb-1">Rentang Periode</label>
+            <select id="s3-period-select" onchange="renderSlide3Chart()" class="w-full bg-white border border-mbBorder rounded-md px-2 py-1.5 font-mono text-xs focus:outline-none focus:border-mbTerracotta">
+              <option value="usd">Kumulatif (2016–2025)</option>
+              <option value="usd_2024">Tahun 2024</option>
+              <option value="usd_2025">Tahun 2025</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Chart Title Header -->
+        <div class="flex items-center justify-between text-xs font-mono px-1">
+          <span class="font-bold text-mbText" id="s3-chart-title">Top 10 Negara Mitra Ekspor - Semua Kode HS</span>
+          <span class="text-mbMuted text-[11px]" id="s3-chart-subtitle">Nilai: Juta US$</span>
+        </div>
+
+        <!-- Partner Horizontal Chart Canvas Container -->
+        <div class="relative h-[300px] sm:h-[340px] w-full">
+          <canvas id="chart-slide-3"></canvas>
+        </div>
+
+        <!-- Dynamic Partner Note -->
+        <div id="slide3-partner-note" class="bg-mbBg border border-mbBorder p-3 rounded-lg text-xs font-mono text-mbMuted leading-relaxed">
+          <!-- Dynamic note inserted via JS -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer Credit -->
+    <footer class="border-t border-mbBorder bg-mbBg px-4 py-3 flex flex-col sm:flex-row justify-between items-center text-[11px] font-mono text-mbMuted gap-1">
+      <div>
+        Sumber: <span class="text-mbText font-semibold">UN Comtrade (2016–2025)</span> | Data diolah Mongabay Indonesia
+      </div>
+      <div class="text-[10px]">
+        Integrasi Smelter & Hilirisasi Tembaga Nasional
+      </div>
+    </footer>
+  </div>
+
+  <!-- JavaScript Application Engine -->
+  <script>
+    // VERIFIED DATASET FROM UN COMTRADE
+    const rawData = {
+      "years": [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+      "export": {
+        "260300": {"usd": [3481556910.0, 3439603897.16, 4186741903.34, 1280054345.58, 2412203642.78, 5386225817.71, 9243990506.56, 8326476670.44, 7969174602.93, 4892334627.66], "tons": [1912881.51, 1539792.7, 1597778.5, 676675.2, 1274511.7, 2235453.9, 3133925.76, 2987611.24, 2470133.62, 1459980.5]},
+        "740100": {"usd": [428244.0, 1132894.4, 2343254.16, 6166273.9, 5796921.41, 12010207.2, 14454839.63, 11014584.6, 18640718.4, 8601571.6], "tons": [269.58, 688.74, 2578.3, 4100.44, 5008.45, 10567.6, 13148.96, 9278.79, 15887.92, 6132.89]},
+        "740200": {"usd": [281778.0, 81658.71, 140879.1, 129010.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], "tons": [49.42, 14.4, 28.9, 43.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+        "740311": {"usd": [784594667.0, 1078422225.49, 1008922388.5, 1062816732.56, 1215518778.98, 1787948751.17, 1637640798.69, 981488361.29, 2018508329.82, 2329592835.19], "tons": [160439.51, 176764.15, 153771.3, 177231.78, 202844.23, 192694.71, 185466.34, 115361.62, 221006.77, 235670.49]},
+        "740400": {"usd": [216037480.0, 331633835.53, 275661626.88, 231462862.64, 197543153.56, 342095705.64, 249453058.04, 229251132.93, 249681867.12, 329608472.76], "tons": [53516.11, 66361.54, 43152.02, 42925.01, 36425.09, 41455.88, 30496.24, 30029.6, 30396.4, 37072.39]}
+      },
+      "import": {
+        "260300": {"usd": [5590.0, 10517.0, 7838.0, 285268.0, 380118.0, 1404864.0, 764555.0, 1624345.0, 923659.0, 1446522.6], "tons": [0.19, 0.5, 0.29, 5337.96, 4041.1, 8000.64, 4438.77, 8503.31, 6444.77, 9696.39]},
+        "740100": {"usd": [138905.0, 722092.0, 6608208.0, 1044932.0, 2990162.0, 243844.0, 3484.0, 505466.0, 386098.0, 673666.39], "tons": [30.71, 153.95, 351.67, 107.73, 128.18, 5.89, 0.1, 12.54, 11.5, 19.75]},
+        "740200": {"usd": [509088.0, 572466.0, 1254720.0, 943662.0, 757711.0, 726756.0, 596114.0, 624441.0, 393005.0, 290715.88], "tons": [78.84, 62.18, 101.06, 0.0, 156.02, 80.92, 69.95, 83.0, 39.69, 20.74]},
+        "740311": {"usd": [622452719.0, 774687956.0, 723417020.0, 612640559.0, 503555355.0, 805184544.0, 674845863.0, 754850371.0, 816973564.0, 1044511081.83], "tons": [125650.08, 0.0, 109595.05, 100764.03, 80955.17, 86567.38, 75589.78, 87285.35, 87949.05, 104932.56]},
+        "740400": {"usd": [106010945.0, 79864682.0, 89296058.0, 102505703.0, 52069384.0, 31672803.0, 22596218.0, 4856201.0, 10172207.0, 10118817.76], "tons": [24244.84, 14076.04, 14402.59, 18241.52, 9684.24, 3800.88, 2701.5, 748.79, 1298.78, 1252.58]}
+      },
+      "partners": {
+        "Export": {
+          "ALL": [
+            {"partner": "Tiongkok", "usd": 17299098116.34, "tons": 5543486.99, "usd_2024": 3029862494.66, "usd_2025": 3726058819.91},
+            {"partner": "Jepang", "usd": 13261128466.26, "tons": 5024086.65, "usd_2024": 2032102274.38, "usd_2025": 834265116.33},
+            {"partner": "Korea Selatan", "usd": 7766556451.75, "tons": 2739456.66, "usd_2024": 1025764035.45, "usd_2025": 623372778.26},
+            {"partner": "Malaysia", "usd": 6112135874.11, "tons": 1055581.32, "usd_2024": 750700302.26, "usd_2025": 656661144.87},
+            {"partner": "India", "usd": 5627958751.5, "tons": 2063152.62, "usd_2024": 969587586.14, "usd_2025": 403389809.03},
+            {"partner": "Filipina", "usd": 3666302428.57, "tons": 1631092.58, "usd_2024": 291296225.84, "usd_2025": 0.0},
+            {"partner": "Taiwan", "usd": 2629389744.97, "tons": 667687.19, "usd_2024": 266338486.29, "usd_2025": 263807125.99},
+            {"partner": "Vietnam", "usd": 2569201651.33, "tons": 332520.2, "usd_2024": 479173114.04, "usd_2025": 504987125.24},
+            {"partner": "Spanyol", "usd": 2336407473.05, "tons": 890458.35, "usd_2024": 575275008.53, "usd_2025": 0.0},
+            {"partner": "Thailand", "usd": 2211180876.76, "tons": 292976.26, "usd_2024": 311671352.52, "usd_2025": 333749751.41}
+          ],
+          "260300": [
+            {"partner": "Tiongkok", "usd": 13531646575.26, "tons": 4953996.02, "usd_2024": 2620351298.28, "usd_2025": 3062950441.48},
+            {"partner": "Jepang", "usd": 12765161454.08, "tons": 4949238.3, "usd_2024": 1986254645.96, "usd_2025": 755737425.5},
+            {"partner": "Korea Selatan", "usd": 6955555001.6, "tons": 2623382.46, "usd_2024": 968885528.11, "usd_2025": 452606104.68},
+            {"partner": "India", "usd": 5581793082.47, "tons": 2055683.47, "usd_2024": 968984768.67, "usd_2025": 394712488.19},
+            {"partner": "Filipina", "usd": 3665763891.81, "tons": 1630999.75, "usd_2024": 291296225.84, "usd_2025": 0.0},
+            {"partner": "Spanyol", "usd": 2332990864.82, "tons": 889774.52, "usd_2024": 575275008.53, "usd_2025": 0.0},
+            {"partner": "Jerman", "usd": 1659116831.68, "tons": 633755.61, "usd_2024": 161983187.11, "usd_2025": 150455328.07},
+            {"partner": "Bulgaria", "usd": 1446083174.41, "tons": 533496.69, "usd_2024": 315041490.78, "usd_2025": 38884922.04},
+            {"partner": "Taiwan", "usd": 1266071267.65, "tons": 484057.3, "usd_2024": 48772579.42, "usd_2025": 36987917.7},
+            {"partner": "Malaysia", "usd": 1074859336.2, "tons": 400136.12, "usd_2024": 32328162.55, "usd_2025": 0.0}
+          ],
+          "740100": [
+            {"partner": "Tiongkok", "usd": 80376860.41, "tons": 67493.51, "usd_2024": 18640718.4, "usd_2025": 8601571.6},
+            {"partner": "Singapura", "usd": 100414.0, "tons": 80.0, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Korea Selatan", "usd": 57060.0, "tons": 40.0, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Thailand", "usd": 51840.0, "tons": 48.0, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Jerman", "usd": 3312.0, "tons": 0.16, "usd_2024": 0.0, "usd_2025": 0.0}
+          ],
+          "740200": [
+            {"partner": "Tiongkok", "usd": 392515.95, "tons": 100.15, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Vietnam", "usd": 133844.52, "tons": 13.68, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Jepang", "usd": 49584.0, "tons": 3.67, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Korea Selatan", "usd": 44830.9, "tons": 12.59, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Singapura", "usd": 4678.0, "tons": 4.62, "usd_2024": 0.0, "usd_2025": 0.0}
+          ],
+          "740311": [
+            {"partner": "Malaysia", "usd": 4942747857.66, "tons": 641450.91, "usd_2024": 705369106.56, "usd_2025": 648062428.73},
+            {"partner": "Tiongkok", "usd": 2962063431.36, "tons": 398703.12, "usd_2024": 343231350.41, "usd_2025": 582253450.89},
+            {"partner": "Vietnam", "usd": 2566587476.37, "tons": 332050.51, "usd_2024": 479056514.03, "usd_2025": 504987125.24},
+            {"partner": "Thailand", "usd": 2192276344.25, "tons": 289464.72, "usd_2024": 311522554.52, "usd_2025": 331147516.11},
+            {"partner": "Taiwan", "usd": 648742472.25, "tons": 84388.38, "usd_2024": 132313907.93, "usd_2025": 105486132.42},
+            {"partner": "Korea Selatan", "usd": 247505790.46, "tons": 28907.47, "usd_2024": 14545365.71, "usd_2025": 122300023.9},
+            {"partner": "Jepang", "usd": 136051394.2, "tons": 19679.97, "usd_2024": 187742.91, "usd_2025": 19336501.3},
+            {"partner": "Singapura", "usd": 101503440.1, "tons": 13300.44, "usd_2024": 1943881.15, "usd_2025": 0.0},
+            {"partner": "Finlandia", "usd": 68075264.0, "tons": 7749.13, "usd_2024": 30337906.6, "usd_2025": 8551686.89},
+            {"partner": "India", "usd": 37319972.04, "tons": 5030.33, "usd_2024": 0.0, "usd_2025": 7467969.71}
+          ],
+          "740400": [
+            {"partner": "Tiongkok", "usd": 724618733.36, "tons": 123194.18, "usd_2024": 47639127.57, "usd_2025": 72253355.94},
+            {"partner": "Taiwan", "usd": 714576005.07, "tons": 99241.51, "usd_2024": 85251998.94, "usd_2025": 121333075.87},
+            {"partner": "Korea Selatan", "usd": 563393768.79, "tons": 87114.14, "usd_2024": 42333141.63, "usd_2025": 48466649.68},
+            {"partner": "Jepang", "usd": 359866033.98, "tons": 55164.71, "usd_2024": 45659885.51, "usd_2025": 59191189.53},
+            {"partner": "Singapura", "usd": 131988186.73, "tons": 20841.21, "usd_2024": 11479510.2, "usd_2025": 13214951.34},
+            {"partner": "Malaysia", "usd": 94528680.25, "tons": 13994.28, "usd_2024": 13003033.15, "usd_2025": 8598716.14},
+            {"partner": "Hong Kong", "usd": 19874143.43, "tons": 3755.52, "usd_2024": 1022153.6, "usd_2025": 2738947.84},
+            {"partner": "Thailand", "usd": 18852549.62, "tons": 3463.53, "usd_2024": 148798.0, "usd_2025": 2602235.3},
+            {"partner": "India", "usd": 8845696.99, "tons": 2438.83, "usd_2024": 602817.47, "usd_2025": 1209351.13},
+            {"partner": "UEA", "usd": 7890759.95, "tons": 1113.86, "usd_2024": 2174560.63, "usd_2025": 0.0}
+          ]
+        },
+        "Import": {
+          "ALL": [
+            {"partner": "Jepang", "usd": 2888553568.84, "tons": 369857.71, "usd_2024": 418373090.0, "usd_2025": 460285029.84},
+            {"partner": "Tiongkok", "usd": 1475400334.84, "tons": 218092.91, "usd_2024": 66672100.0, "usd_2025": 118659258.83},
+            {"partner": "Filipina", "usd": 996471081.42, "tons": 154693.11, "usd_2024": 109000931.0, "usd_2025": 17162694.42},
+            {"partner": "Australia", "usd": 875174837.5, "tons": 103210.06, "usd_2024": 167828951.0, "usd_2025": 416902276.5},
+            {"partner": "Cile", "usd": 384056642.97, "tons": 49942.06, "usd_2024": 37020521.0, "usd_2025": 4701606.97},
+            {"partner": "Myanmar", "usd": 300552713.0, "tons": 49850.69, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Thailand", "usd": 140554135.89, "tons": 22711.72, "usd_2024": 8805619.0, "usd_2025": 15538421.89},
+            {"partner": "Korea Selatan", "usd": 131592389.33, "tons": 19346.3, "usd_2024": 9204891.0, "usd_2025": 3850.33},
+            {"partner": "Meksiko", "usd": 88852310.0, "tons": 13464.63, "usd_2024": 0.0, "usd_2025": 89.0},
+            {"partner": "India", "usd": 83309742.0, "tons": 14133.76, "usd_2024": 3224.0, "usd_2025": 61.0}
+          ],
+          "260300": [
+            {"partner": "Tiongkok", "usd": 1722663.24, "tons": 9906.88, "usd_2024": 717030.0, "usd_2025": 4295.23},
+            {"partner": "Filipina", "usd": 1000236.65, "tons": 8722.17, "usd_2024": 150.0, "usd_2025": 512130.65},
+            {"partner": "Malaysia", "usd": 860889.19, "tons": 6715.71, "usd_2024": 0.0, "usd_2025": 351652.19},
+            {"partner": "Hong Kong", "usd": 633543.0, "tons": 3690.29, "usd_2024": 36399.0, "usd_2025": 0.0},
+            {"partner": "Thailand", "usd": 339157.0, "tons": 1356.63, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Korea Selatan", "usd": 328753.0, "tons": 2858.92, "usd_2024": 19131.0, "usd_2025": 3386.0}
+          ],
+          "740100": [
+            {"partner": "Amerika Serikat", "usd": 9805346.0, "tons": 417.53, "usd_2024": 361895.0, "usd_2025": 672954.0},
+            {"partner": "Kanada", "usd": 2194206.0, "tons": 99.45, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Taiwan", "usd": 817985.0, "tons": 120.02, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Singapura", "usd": 275070.39, "tons": 153.78, "usd_2024": 21908.0, "usd_2025": 508.39},
+            {"partner": "Afrika Selatan", "usd": 189870.0, "tons": 7.27, "usd_2024": 0.0, "usd_2025": 0.0}
+          ],
+          "740200": [
+            {"partner": "Amerika Serikat", "usd": 3195360.0, "tons": 344.63, "usd_2024": 197455.0, "usd_2025": 98516.0},
+            {"partner": "Jepang", "usd": 904931.8, "tons": 91.26, "usd_2024": 28983.0, "usd_2025": 14473.8},
+            {"partner": "Tiongkok", "usd": 873517.53, "tons": 154.42, "usd_2024": 84803.0, "usd_2025": 55547.53},
+            {"partner": "Inggris", "usd": 467415.0, "tons": 15.77, "usd_2024": 30755.0, "usd_2025": 0.0},
+            {"partner": "Singapura", "usd": 417607.52, "tons": 92.63, "usd_2024": 46161.0, "usd_2025": 44525.52}
+          ],
+          "740311": [
+            {"partner": "Jepang", "usd": 2887625516.04, "tons": 369713.97, "usd_2024": 418343979.0, "usd_2025": 460270155.04},
+            {"partner": "Tiongkok", "usd": 1472795083.07, "tons": 208030.47, "usd_2024": 65868464.0, "usd_2025": 118599110.07},
+            {"partner": "Filipina", "usd": 940438148.77, "tons": 135334.67, "usd_2024": 109000781.0, "usd_2025": 16650563.77},
+            {"partner": "Australia", "usd": 856955264.37, "tons": 99697.1, "usd_2024": 167813416.0, "usd_2025": 416277864.37},
+            {"partner": "Cile", "usd": 381631584.97, "tons": 49134.23, "usd_2024": 36943845.0, "usd_2025": 4701606.97},
+            {"partner": "Myanmar", "usd": 300552713.0, "tons": 49850.69, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Korea Selatan", "usd": 130835370.0, "tons": 16396.23, "usd_2024": 9185760.0, "usd_2025": 0.0},
+            {"partner": "Meksiko", "usd": 85760825.0, "tons": 12365.87, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "India", "usd": 83180815.0, "tons": 14034.68, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Tanzania", "usd": 38936162.22, "tons": 7568.26, "usd_2024": 0.0, "usd_2025": 2906393.22}
+          ],
+          "740400": [
+            {"partner": "Thailand", "usd": 129350231.35, "tons": 20223.92, "usd_2024": 7251497.0, "usd_2025": 6229694.35},
+            {"partner": "Malaysia", "usd": 63536974.0, "tons": 12231.96, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "UEA", "usd": 58147358.0, "tons": 9876.52, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Filipina", "usd": 55032696.0, "tons": 10636.27, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Taiwan", "usd": 53096059.0, "tons": 9989.2, "usd_2024": 2223050.0, "usd_2025": 2415142.0},
+            {"partner": "Arab Saudi", "usd": 29837156.0, "tons": 5290.12, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Kuwait", "usd": 27749153.0, "tons": 4989.83, "usd_2024": 0.0, "usd_2025": 0.0},
+            {"partner": "Hong Kong", "usd": 18496256.0, "tons": 3266.2, "usd_2024": 0.0, "usd_2025": 306.0},
+            {"partner": "Australia", "usd": 18038733.13, "tons": 3336.48, "usd_2024": 0.0, "usd_2025": 608463.13},
+            {"partner": "Pakistan", "usd": 10396960.0, "tons": 1969.95, "usd_2024": 0.0, "usd_2025": 0.0}
+          ]
+        }
+      }
+    };
+
+    // Color Mapping Definition
+    const hsColors = {
+      "260300": "#B85D3B", // Terracotta
+      "740311": "#1E5631", // Forest
+      "740400": "#4A7C8C", // Teal
+      "740100": "#D9A441", // Ochre
+      "740200": "#7A5C61"  // Plum
+    };
+
+    // Global State
+    let currentTab = 1;
+    let s1Flow = 'export';
+    let s1Metric = 'usd';
+    let s3Flow = 'Export';
+    let chart1Instance = null;
+    let chart3Instance = null;
+
+    // Helper for number formatting
+    function formatID(num, dec = 2) {
+      return num.toLocaleString('id-ID', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    }
+
+    // ANIMATED COUNTER FOR KPIS
+    function animateCounters() {
+      const duration = 1200;
+      const startTime = performance.now();
+
+      const targetEkspor = 67.26;
+      const targetImpor = 7.87;
+      const targetSurplus = 59.39;
+      const targetPangsa = 75.3;
+
+      function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 3); // Ease out cubic
+
+        document.getElementById('kpi-ekspor').innerText = `US$ ${formatID(targetEkspor * ease)} M`;
+        document.getElementById('kpi-impor').innerText = `US$ ${formatID(targetImpor * ease)} M`;
+        document.getElementById('kpi-surplus').innerText = `+US$ ${formatID(targetSurplus * ease)} M`;
+        document.getElementById('kpi-pangsa').innerText = `${formatID(targetPangsa * ease, 1)}%`;
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        }
+      }
+      requestAnimationFrame(update);
+    }
+
+    // TAB NAVIGATION LOGIC
+    function switchTab(tabIndex) {
+      currentTab = tabIndex;
+      document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+        if (idx + 1 === tabIndex) {
+          btn.classList.add('bg-mbCard', 'border-mbBorder', 'text-mbTerracotta', 'shadow-sm', 'font-bold');
+          btn.classList.remove('border-transparent', 'text-mbMuted');
+        } else {
+          btn.classList.remove('bg-mbCard', 'border-mbBorder', 'text-mbTerracotta', 'shadow-sm', 'font-bold');
+          btn.classList.add('border-transparent', 'text-mbMuted');
+        }
+      });
+
+      document.querySelectorAll('.tab-content').forEach((content, idx) => {
+        if (idx + 1 === tabIndex) {
+          content.classList.add('active');
+        } else {
+          content.classList.remove('active');
+        }
+      });
+
+      // Render chart if necessary
+      if (tabIndex === 1 && chart1Instance) {
+        chart1Instance.resize();
+      } else if (tabIndex === 3) {
+        renderSlide3Chart();
+      }
+    }
+
+    // SLIDE 1: INTERACTIVE CHART ENGINE
+    function setSlide1Flow(flow) {
+      s1Flow = flow;
+      document.getElementById('s1-flow-exp').className = flow === 'export' ? 'px-2.5 py-1 rounded font-bold bg-mbTerracotta text-white shadow-sm transition' : 'px-2.5 py-1 rounded text-mbMuted hover:text-mbText transition';
+      document.getElementById('s1-flow-imp').className = flow === 'import' ? 'px-2.5 py-1 rounded font-bold bg-mbTerracotta text-white shadow-sm transition' : 'px-2.5 py-1 rounded text-mbMuted hover:text-mbText transition';
+      renderSlide1Chart();
+    }
+
+    function setSlide1Metric(metric) {
+      s1Metric = metric;
+      document.getElementById('s1-met-usd').className = metric === 'usd' ? 'px-2.5 py-1 rounded font-bold bg-mbText text-white shadow-sm transition' : 'px-2.5 py-1 rounded text-mbMuted hover:text-mbText transition';
+      document.getElementById('s1-met-ton').className = metric === 'tons' ? 'px-2.5 py-1 rounded font-bold bg-mbText text-white shadow-sm transition' : 'px-2.5 py-1 rounded text-mbMuted hover:text-mbText transition';
+      renderSlide1Chart();
+    }
+
+    function toggleHsSeries(index) {
+      if (!chart1Instance) return;
+      const meta = chart1Instance.getDatasetMeta(index);
+      meta.hidden = meta.hidden === null ? !chart1Instance.data.datasets[index].hidden : null;
+      chart1Instance.update();
+
+      const btn = document.getElementById(`leg-hs-${index}`);
+      if (meta.hidden) {
+        btn.classList.add('opacity-40', 'line-through');
+      } else {
+        btn.classList.remove('opacity-40', 'line-through');
+      }
+    }
+
+    function renderSlide1Chart() {
+      const ctx = document.getElementById('chart-slide-1').getContext('2d');
+      const years = rawData.years;
+      const flowData = rawData[s1Flow];
+
+      const divisor = s1Metric === 'usd' ? 1000000 : 1000; // Million USD or Thousand Tons
+
+      const datasets = [
+        {
+          label: 'HS 260300 (Bijih & Konsentrat)',
+          data: flowData["260300"][s1Metric].map(v => v / divisor),
+          backgroundColor: hsColors["260300"],
+          borderRadius: 2
+        },
+        {
+          label: 'HS 740311 (Katoda Murni)',
+          data: flowData["740311"][s1Metric].map(v => v / divisor),
+          backgroundColor: hsColors["740311"],
+          borderRadius: 2
+        },
+        {
+          label: 'HS 740400 (Limbah & Skrap)',
+          data: flowData["740400"][s1Metric].map(v => v / divisor),
+          backgroundColor: hsColors["740400"],
+          borderRadius: 2
+        },
+        {
+          label: 'HS 740100 (Matte & Semen)',
+          data: flowData["740100"][s1Metric].map(v => v / divisor),
+          backgroundColor: hsColors["740100"],
+          borderRadius: 2
+        },
+        {
+          label: 'HS 740200 (Anoda Tembaga)',
+          data: flowData["740200"][s1Metric].map(v => v / divisor),
+          backgroundColor: hsColors["740200"],
+          borderRadius: 2
+        }
+      ];
+
+      if (chart1Instance) {
+        chart1Instance.destroy();
+      }
+
+      chart1Instance = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: years, datasets: datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              backgroundColor: '#1F2421',
+              titleFont: { family: 'Space Mono', size: 12 },
+              bodyFont: { family: 'IBM Plex Mono', size: 11 },
+              callbacks: {
+                label: function(context) {
+                  const val = context.raw;
+                  const unit = s1Metric === 'usd' ? 'Juta US$' : 'Ribu Ton';
+                  return ` ${context.dataset.label}: ${formatID(val)} ${unit}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              stacked: true,
+              grid: { display: false },
+              ticks: { font: { family: 'Space Mono', size: 11 }, color: '#5C625D' }
+            },
+            y: {
+              stacked: true,
+              grid: { color: '#DCD9D0', strokeDashArray: [3, 3] },
+              ticks: {
+                font: { family: 'IBM Plex Mono', size: 10 },
+                color: '#5C625D',
+                callback: function(value) {
+                  return formatID(value, 0) + (s1Metric === 'usd' ? 'M' : 'k');
+                }
+              }
+            }
+          }
+        }
+      });
+
+      // Update Dynamic Insight Text
+      const insight = document.getElementById('slide1-insight');
+      if (s1Flow === 'export') {
+        insight.innerHTML = `<strong>Catatan Tren Ekspor:</strong> Ekspor tembaga Indonesia didominasi konsentrat mentah (HS 260300) yang menyumbang 75,3% total nilai. Namun pada 2025, ekspor konsentrat turun <strong>-38,6%</strong> menjadi US$ 4,89 Miliar seiring mulainya operasi smelter baru domestik, sementara ekspor katoda murni (HS 740311) mencetak rekor <strong>US$ 2,33 Miliar</strong>.`;
+      } else {
+        insight.innerHTML = `<strong>Catatan Tren Impor:</strong> Impor tembaga didominasi katoda murni (HS 740311) yang mencakup 93,2% dari total nilai impor. Pada 2025, nilai impor katoda menembus rekor <strong>US$ 1,04 Miliar</strong> (104.932 ton) dari Jepang dan Australia untuk memenuhi kebutuhan manufaktur kabel/listrik domestik.`;
+      }
+    }
+
+    // SLIDE 3: MITRA DAGANG HORIZONTAL CHART
+    function setSlide3Flow(flow) {
+      s3Flow = flow;
+      document.getElementById('s3-flow-exp').className = flow === 'Export' ? 'w-1/2 py-1 rounded font-bold bg-mbTerracotta text-white shadow-sm transition' : 'w-1/2 py-1 rounded text-mbMuted hover:text-mbText transition';
+      document.getElementById('s3-flow-imp').className = flow === 'Import' ? 'w-1/2 py-1 rounded font-bold bg-mbTerracotta text-white shadow-sm transition' : 'w-1/2 py-1 rounded text-mbMuted hover:text-mbText transition';
+      renderSlide3Chart();
+    }
+
+    function renderSlide3Chart() {
+      const hsCode = document.getElementById('s3-hs-select').value;
+      const periodKey = document.getElementById('s3-period-select').value;
+      const partnerList = rawData.partners[s3Flow][hsCode] || [];
+
+      // Sort & slice Top 10
+      const sorted = [...partnerList].sort((a, b) => (b[periodKey] || 0) - (a[periodKey] || 0)).slice(0, 10);
+
+      const labels = sorted.map(d => d.partner);
+      const values = sorted.map(d => ((d[periodKey] || 0) / 1000000)); // Million USD
+
+      const colorMap = {
+        "ALL": s3Flow === 'Export' ? "#B85D3B" : "#4A7C8C",
+        "260300": hsColors["260300"],
+        "740311": hsColors["740311"],
+        "740400": hsColors["740400"],
+        "740100": hsColors["740100"],
+        "740200": hsColors["740200"]
+      };
+
+      const barColor = colorMap[hsCode] || "#B85D3B";
+
+      const ctx = document.getElementById('chart-slide-3').getContext('2d');
+
+      if (chart3Instance) {
+        chart3Instance.destroy();
+      }
+
+      chart3Instance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Nilai (Juta US$)',
+            data: values,
+            backgroundColor: barColor,
+            borderRadius: 3
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1F2421',
+              titleFont: { family: 'Space Mono', size: 12 },
+              bodyFont: { family: 'IBM Plex Mono', size: 11 },
+              callbacks: {
+                label: function(context) {
+                  return ` Nilai: US$ ${formatID(context.raw)} Miliar / Juta`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: '#DCD9D0', strokeDashArray: [3, 3] },
+              ticks: { font: { family: 'IBM Plex Mono', size: 10 }, color: '#5C625D' }
+            },
+            y: {
+              grid: { display: false },
+              ticks: { font: { family: 'Space Mono', size: 11 }, color: '#1F2421' }
+            }
+          }
+        }
+      });
+
+      // Titles & Notes
+      const hsLabels = {
+        "ALL": "Semua Kode HS",
+        "260300": "Bijih & Konsentrat (HS 260300)",
+        "740311": "Katoda Murni (HS 740311)",
+        "740400": "Limbah & Skrap (HS 740400)",
+        "740100": "Matte & Semen (HS 740100)",
+        "740200": "Anoda Tembaga (HS 740200)"
+      };
+
+      const periodLabels = {
+        "usd": "Kumulatif 2016–2025",
+        "usd_2024": "Tahun 2024",
+        "usd_2025": "Tahun 2025"
+      };
+
+      document.getElementById('s3-chart-title').innerText = `Top 10 Negara Mitra ${s3Flow === 'Export' ? 'Ekspor' : 'Impor'} - ${hsLabels[hsCode]}`;
+      document.getElementById('s3-chart-subtitle').innerText = `Periode: ${periodLabels[periodKey]}`;
+
+      const noteElem = document.getElementById('slide3-partner-note');
+      if (s3Flow === 'Export') {
+        if (hsCode === '260300' || hsCode === 'ALL') {
+          noteElem.innerHTML = `<strong>Sorotan Ekspor Konsentrat:</strong> Tiongkok (US$ 13,53 M) dan Jepang (US$ 12,77 M) menyerap lebih dari 51% total konsentrat Indonesia. Pada 2025, Tiongkok menyerap 62,6% dari seluruh ekspor konsentrat tembaga Indonesia.`;
+        } else if (hsCode === '740311') {
+          noteElem.innerHTML = `<strong>Sorotan Ekspor Katoda:</strong> Pasar katoda murni Indonesia didominasi negara ASEAN & Asia Timur: Malaysia (US$ 4,94 M | 35,5%), Tiongkok (US$ 2,96 M), Vietnam (US$ 2,57 M), dan Thailand (US$ 2,19 M).`;
+        } else {
+          noteElem.innerHTML = `<strong>Sorotan Mitra:</strong> Menampilkan pola perdagangan mitra utama untuk simpul rantai nilai tembaga yang dipilih.`;
+        }
+      } else {
+        noteElem.innerHTML = `<strong>Sorotan Pasokan Impor:</strong> Indonesia mengimpor katoda murni utama dari Jepang (US$ 2,89 M), Tiongkok (US$ 1,47 M), Filipina (US$ 940 Jt), dan Australia (US$ 857 Jt).`;
+      }
+    }
+
+    // SWIPE GESTURES FOR MOBILE & KEYBOARD ARROWS
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const swipeContainer = document.getElementById('swipe-container');
+
+    swipeContainer.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, false);
+
+    swipeContainer.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, false);
+
+    function handleSwipe() {
+      const threshold = 40;
+      if (touchEndX < touchStartX - threshold) {
+        // Swipe left -> Next tab
+        if (currentTab < 3) switchTab(currentTab + 1);
+      }
+      if (touchEndX > touchStartX + threshold) {
+        // Swipe right -> Prev tab
+        if (currentTab > 1) switchTab(currentTab - 1);
+      }
+    }
+
+    // Keyboard Arrow Controls
+    window.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' && currentTab < 3) {
+        switchTab(currentTab + 1);
+      } else if (e.key === 'ArrowLeft' && currentTab > 1) {
+        switchTab(currentTab - 1);
+      }
+    });
+
+    // INITIALIZATION ON LOAD
+    window.onload = function() {
+      animateCounters();
+      renderSlide1Chart();
+      renderSlide3Chart();
+    };
+  </script>
+</body>
+</html>
